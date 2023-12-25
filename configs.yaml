@@ -13,7 +13,7 @@ defaults:
   eval_episode_num: 10
   log_every: 1e4
   reset_every: 0
-  device: 'cuda:0'
+  device: 'cuda:1'
   compile: True
   precision: 32
   debug: False
@@ -160,12 +160,21 @@ crafter:
   imag_gradient: 'reinforce'
 
 atari100k:
-  steps: 4e5
+  steps: 4e6
   envs: 1
   action_repeat: 4
-  train_ratio: 1024
+  train_ratio: 512
   video_pred_log: true
-  eval_episode_num: 100
+  dyn_hidden: 1024
+  dyn_deter: 4096
+  units: 1024
+  reward_layers: 5
+  cont_layers: 5
+  value_layers: 5
+  actor_layers: 5
+  encoder: {mlp_keys: '$^', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
+  decoder: {mlp_keys: '$^', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
+  eval_episode_num: 10
   actor_dist: 'onehot'
   imag_gradient: 'reinforce'
   stickey: False

@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import numpy as np
 
 
@@ -38,7 +38,7 @@ class Atari:
             from PIL import Image
 
             self._image = Image
-        import gym.envs.atari
+        
 
         if name == "james_bond":
             name = "jamesbond"
@@ -51,13 +51,7 @@ class Atari:
         self._length = length
         self._random = np.random.RandomState(seed)
         with self.LOCK:
-            self._env = gym.envs.atari.AtariEnv(
-                game=name,
-                obs_type="image",
-                frameskip=1,
-                repeat_action_probability=0.25 if sticky else 0.0,
-                full_action_space=(actions == "all"),
-            )
+            self._env = gym.make(name, obs_type="rgb", render_mode="human")
         assert self._env.unwrapped.get_action_meanings()[0] == "NOOP"
         shape = self._env.observation_space.shape
         self._buffer = [np.zeros(shape, np.uint8) for _ in range(2)]
@@ -94,7 +88,7 @@ class Atari:
         if len(action.shape) >= 1:
             action = np.argmax(action)
         for repeat in range(self._repeat):
-            _, reward, over, info = self._env.step(action)
+            _, reward, over, info, _  = self._env.step(action)
             self._step += 1
             total += reward
             if repeat == self._repeat - 2:
@@ -117,11 +111,11 @@ class Atari:
             is_terminal=dead or over,
         )
 
-    def reset(self):
+    def reset(self,seed=None, options=None):
         self._env.reset()
         if self._noops:
             for _ in range(self._random.randint(self._noops)):
-                _, _, dead, _ = self._env.step(0)
+                _, _, dead, _, _ = self._env.step(0)
                 if dead:
                     self._env.reset()
         self._last_lives = self._ale.lives()
@@ -145,6 +139,14 @@ class Atari:
                 image = self._image.fromarray(image)
                 image = image.resize(self._size, self._image.NEAREST)
                 image = np.array(image)
+                
+            #HACK
+            top_left = (4, 29)
+            bottom_right = (59, 56)
+            roi = image[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+            if np.all(roi == [0, 0, 0]):
+                self._env.step(1)
+
         if self._gray:
             weights = [0.299, 0.587, 1 - (0.299 + 0.587)]
             image = np.tensordot(image, weights, (-1, 0)).astype(image.dtype)
@@ -157,7 +159,7 @@ class Atari:
         )
 
     def _screen(self, array):
-        self._ale.getScreenRGB2(array)
+        self._ale.getScreenRGB(array)
 
     def close(self):
         return self._env.close()
