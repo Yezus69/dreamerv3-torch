@@ -1,6 +1,9 @@
 # dreamerv3-torch
 Pytorch implementation of [Mastering Diverse Domains through World Models](https://arxiv.org/abs/2301.04104v1). DreamerV3 is a scalable algorithm that outperforms previous approaches across various domains with fixed hyperparameters.
 
+## Atari Breakout-V4 Checkpoints
+https://drive.google.com/drive/folders/1-43hYql7wQJjZ7r5kDOv6ccmHpFhgcuh
+
 ## Instructions
 
 ### Method 1: Manual
